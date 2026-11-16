@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NetManage - Sistem Manajemen WiFi</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  * { font-family: 'Segoe UI', Tahoma, sans-serif; }
+  .fade-in { animation: fadeIn 0.3s ease-in; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to {opacity:1; transform:translateY(0);} }
+  .sidebar-item.active { background: linear-gradient(90deg,#3b82f6,#6366f1); color: white; }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+</style>
+</head>
+<body class="bg-slate-100">
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 fade-in">
+    <div class="text-center mb-6">
+      <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl mx-auto flex items-center justify-center mb-3">
+        <span class="text-3xl">📶</span>
+      </div>
+      <h1 class="text-2xl font-bold text-slate-800">NetManage</h1>
+      <p class="text-slate-500 text-sm">Sistem Manajemen WiFi</p>
+    </div>
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="text-sm font-semibold text-slate-700">Email Admin</label>
+        <input type="email" id="loginEmail" required placeholder="admin@netmanage.com"
+          class="w-full mt-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <div>
+        <label class="text-sm font-semibold text-slate-700">Password</label>
+        <input type="password" id="loginPassword" required placeholder="••••••••"
+          class="w-full mt-1 px-4 py-3 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500">
+      </div>
+      <button type="submit"
+        class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl font-semibold hover:opacity-90 transition">
+        Masuk
+      </button>
+      <p id="loginMsg" class="text-center text-sm text-red-500 hidden"></p>
+    </form>
+    <div class="mt-6 p-3 bg-blue-50 rounded-xl text-xs text-slate-600 text-center">
+      <p class="font-semibold">Default Login:</p>
+      <p>Email: <b>admin@netmanage.com</b></p>
+      <p>Password: <b>admin123</b></p>
+    </div>
+  </div>
+</div>
+
+<!-- APP PAGE -->
+<div id="appPage" class="hidden min-h-screen flex">
+
+  <!-- SIDEBAR -->
+  <aside class="w-64 bg-slate-900 text-white fixed h-full z-20 flex flex-col">
+    <div class="p-5 border-b border-slate-700 flex items-center gap-3">
+      <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center text-xl">📶</div>
+      <div>
+        <h2 class="font-bold">NetManage</h2>
+        <p class="text-xs text-slate-400">Admin Panel</p>
+      </div>
+    </div>
+    <nav class="flex-1 p-3 space-y-1 overflow-y-auto">
+      <a href="#" onclick="showSection('dashboard')" class="sidebar-item active flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition">
+        <span>🏠</span> Dashboard
+      </a>
+      <a href="#" onclick="showSection('pelanggan')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800">
+        <span>👥</span> Data Pelanggan
+      </a>
+      <a href="#" onclick="showSection('tagihan')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800">
+        <span>💳</span> Tagihan & Pembayaran
+      </a>
+      <a href="#" onclick="showSection('tiket')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800">
+        <span>🎫</span> Tiket Gangguan
+      </a>
+      <a href="#" onclick="showSection('kas')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800">
+        <span>💰</span> Kas Keuangan
+      </a>
+      <a href="#" onclick="showSection('bagihasil')" class="sidebar-item flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition hover:bg-slate-800">
+        <span>📊</span> Bagi Hasil
+      </a>
+    </nav>
+    <div class="p-3 border-t border-slate-700">
+      <button onclick="logout()" class="w-full bg-red-600 hover:bg-red-700 text-white py-2 rounded-xl text-sm font-semibold">
+        Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="ml-64 flex-1 p-6">
+
+    <!-- DASHBOARD -->
+    <section id="section-dashboard" class="fade-in">
+      <h1 class="text-2xl font-bold text-slate-800 mb-1">Dashboard</h1>
+      <p class="text-slate-500 mb-6 text-sm">Selamat datang kembali, Administrator</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-blue-500">
+          <p class="text-slate-500 text-sm">Total Pelanggan</p>
+          <p class="text-2xl font-bold text-slate-800" id="statPelanggan">0</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-green-500">
+          <p class="text-slate-500 text-sm">Tagihan Lunas</p>
+          <p class="text-2xl font-bold text-slate-800" id="statLunas">0</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-yellow-500">
+          <p class="text-slate-500 text-sm">Belum Bayar</p>
+          <p class="text-2xl font-bold text-slate-800" id="statBelum">0</p>
+        </div>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border-l-4 border-purple-500">
+          <p class="text-slate-500 text-sm">Saldo Kas</p>
+          <p class="text-2xl font-bold text-slate-800" id="statSaldo">Rp 0</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm mb-6">
+        <h3 class="font-bold text-slate-800 mb-4">Grafik Kas (Masuk vs Keluar)</h3>
+        <canvas id="kasChart" height="90"></canvas>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm">
+        <h3 class="font-bold text-slate-800 mb-4">Tiket Gangguan Terbuka</h3>
+        <div id="tiketPreview" class="text-sm text-slate-500">Tidak ada tiket terbuka</div>
+      </div>
+    </section>
+
+    <!-- PELANGGAN -->
+    <section id="section-pelanggan" class="hidden fade-in">
+      <h1 class="text-2xl font-bold text-slate-800 mb-1">Data Pelanggan</h1>
+      <p class="text-slate-500 mb-6 text-sm">Kelola data pelanggan WiFi</p>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm mb-4">
+        <h3 class="font-bold mb-4">Tambah Pelanggan</h3>
+        <form id="formPelanggan" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input required id="pNama" placeholder="Nama Lengkap" class="px-4 py-2 border rounded-xl">
+          <input required id="pAlamat" placeholder="Alamat" class="px-4 py-2 border rounded-xl">
+          <input required id="pHp" placeholder="No. HP" class="px-4 py-2 border rounded-xl">
+          <select id="pPaket" class="px-4 py-2 border rounded-xl">
+            <option>10 Mbps</option><option>20 Mbps</option><option>50 Mbps</option><option>100 Mbps</option>
+          </select>
+          <input required type="number" id="pBiaya" placeholder="Biaya Bulanan (Rp)" class="px-4 py-2 border rounded-xl">
+          <button class="bg-blue-600 text-white rounded-xl py-2 font-semibold hover:bg-blue-700">Simpan</button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="p-3 text-left">Nama</th>
+              <th class="p-3 text-left">Alamat</th>
+              <th class="p-3 text-left">No. HP</th>
+              <th class="p-3 text-left">Paket</th>
+              <th class="p-3 text-left">Biaya</th>
+              <th class="p-3 text-left">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tblPelanggan"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TAGIHAN -->
+    <section id="section-tagihan" class="hidden fade-in">
+      <h1 class="text-2xl font-bold text-slate-800 mb-1">Tagihan & Pembayaran</h1>
+      <p class="text-slate-500 mb-6 text-sm">Kelola tagihan bulanan pelanggan</p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white p-5 rounded-2xl shadow">
+          <p class="text-sm opacity-80">Bank BCA</p>
+          <p class="text-xl font-bold tracking-wider">4730892069</p>
+          <p class="text-sm mt-1">A.N Ahmad Basyit</p>
+        </div>
+        <div class="bg-gradient-to-r from-yellow-500 to-orange-500 text-white p-5 rounded-2xl shadow">
+          <p class="text-sm opacity-80">Bank Mandiri</p>
+          <p class="text-xl font-bold tracking-wider">1640006614236</p>
+          <p class="text-sm mt-1">A.N Ahmad Basyit</p>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm mb-4">
+        <h3 class="font-bold mb-4">Buat Tagihan Baru</h3>
+        <form id="formTagihan" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <select required id="tPelanggan" class="px-4 py-2 border rounded-xl"></select>
+          <input required type="number" id="tJumlah" placeholder="Jumlah Tagihan" class="px-4 py-2 border rounded-xl">
+          <input required type="month" id="tBulan" class="px-4 py-2 border rounded-xl">
+          <button class="bg-blue-600 text-white rounded-xl py-2 font-semibold hover:bg-blue-700">Buat</button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="p-3 text-left">Pelanggan</th>
+              <th class="p-3 text-left">Periode</th>
+              <th class="p-3 text-left">Jumlah</th>
+              <th class="p-3 text-left">Status</th>
+              <th class="p-3 text-left">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tblTagihan"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TIKET -->
+    <section id="section-tiket" class="hidden fade-in">
+      <h1 class="text-2xl font-bold text-slate-800 mb-1">Tiket Gangguan</h1>
+      <p class="text-slate-500 mb-6 text-sm">Laporan gangguan WiFi pelanggan</p>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm mb-4">
+        <h3 class="font-bold mb-4">Buat Tiket Baru</h3>
+        <form id="formTiket" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <select required id="tkPelanggan" class="px-4 py-2 border rounded-xl"></select>
+          <input required id="tkDeskripsi" placeholder="Deskripsi Gangguan" class="px-4 py-2 border rounded-xl md:col-span-2"></input>
+          <input id="tkTeknisi" placeholder="Nama Teknisi (opsional)" class="px-4 py-2 border rounded-xl">
+          <button class="bg-blue-600 text-white rounded-xl py-2 font-semibold hover:bg-blue-700">Buat Tiket</button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="p-3 text-left">Tanggal</th>
+              <th class="p-3 text-left">Pelanggan</th>
+              <th class="p-3 text-left">Gangguan</th>
+              <th class="p-3 text-left">Status</th>
+              <th class="p-3 text-left">Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tblTiket"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- KAS -->
+    <section id="section-kas" class="hidden fade-in">
+      <h1 class="text-2xl font-bold text-slate-800 mb-1">Kas Keuangan</h1>
+      <p class="text-slate-500 mb-6 text-sm">Catat pemasukan dan pengeluaran</p>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm mb-4">
+        <h3 class="font-bold mb-4">Tambah Transaksi</h3>
+        <form id="formKas" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <input required type="date" id="kTanggal" class="px-4 py-2 border rounded-xl">
+          <input required id="kKet" placeholder="Keterangan" class="px-4 py-2 border rounded-xl">
+          <select id="kTipe" class="px-4 py-2 border rounded-xl">
+            <option value="masuk">Masuk</option>
+            <option value="keluar">Keluar</option>
+          </select>
+          <input required type="number" id="kJumlah" placeholder="Jumlah (Rp)" class="px-4 py-2 border rounded-xl">
+          <button class="bg-blue-600 text-white rounded-xl py-2 font-semibold hover:bg-blue-700 md:col-span-4">Simpan Transaksi</button>
+        </form>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="p-3 text-left">Tanggal</th>
+              <th class="p-3 text-left">Keterangan</th>
+              <th class="p-3 text-left">Tipe</th>
+              <th class="p-3 text-left">Jumlah</th>
+            </tr>
+          </thead>
+          <tbody id="tblKas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BAGI HASIL -->
+    <section id="section-bagihasil" class="hidden fade-in">
+      <h1 class="text-2xl font-bold text-slate-800 mb-1">Bagi Hasil</h1>
+      <p class="text-slate-500 mb-6 text-sm">Pembagian hasil setiap bulan</p>
+
+      <div class="bg-white p-6 rounded-2xl shadow-sm mb-4">
+        <h3 class="font-bold mb-4">Hitung Bagi Hasil</h3>
+        <form id="formBagi" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <input required type="month" id="bBulan" class="px-4 py-2 border rounded-xl">
+          <input required id="bPenerima" placeholder="Nama Penerima" class="px-4 py-2 border rounded-xl">
+          <input required type="number" id="bPersen" placeholder="Persentase (%)" class="px-4 py-2 border rounded-xl" min="1" max="100">
+          <button class="bg-blue-600 text-white rounded-xl py-2 font-semibold hover:bg-blue-700 md:col-span-3">Hitung & Simpan</button>
+        </form>
+        <div id="hasilBagi" class="mt-4"></div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-slate-100">
+            <tr>
+              <th class="p-3 text-left">Periode</th>
+              <th class="p-3 text-left">Penerima</th>
+              <th class="p-3 text-left">Persentase</th>
+              <th class="p-3 text-left">Jumlah</th>
+            </tr>
+          </thead>
+          <tbody id="tblBagi"></tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<script>
+// ================== AUTH ==================
+const ADMIN = { email: 'admin@netmanage.com', password: 'admin123' };
+
+document.getElementById('loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const pass = document.getElementById('loginPassword').value;
+  const msg = document.getElementById('loginMsg');
+  if (email === ADMIN.email && pass === ADMIN.password) {
+    localStorage.setItem('netmanage_logged', '1');
+    enterApp();
+  } else {
+    msg.textContent = 'Email atau password salah!';
+    msg.classList.remove('hidden');
+  }
+});
+
+function enterApp() {
+  document.getElementById('loginPage').classList.add('hidden');
+  document.getElementById('appPage').classList.remove('hidden');
+  renderAll();
+}
+
+function logout() {
+  localStorage.removeItem('netmanage_logged');
+  location.reload();
+}
+
+if (localStorage.getItem('netmanage_logged') === '1') enterApp();
+
+// ================== DB (localStorage) ==================
+const DB = {
+  get: k => JSON.parse(localStorage.getItem('nm_' + k) || '[]'),
+  set: (k, v) => localStorage.setItem('nm_' + k, JSON.stringify(v))
+};
+
+// ================== NAV ==================
+function showSection(name) {
+  document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+  document.getElementById('section-' + name).classList.remove('hidden');
+  document.querySelectorAll('.sidebar-item').forEach(a => a.classList.remove('active'));
+  event.target.closest('a').classList.add('active');
+  if (name === 'dashboard') renderDashboard();
+}
+
+// ================== PELANGGAN ==================
+document.getElementById('formPelanggan').addEventListener('submit', e => {
+  e.preventDefault();
+  const list = DB.get('pelanggan');
+  list.push({
+    id: Date.now(),
+    nama: pNama.value,
+    alamat: pAlamat.value,
+    hp: pHp.value,
+    paket: pPaket.value,
+    biaya: +pBiaya.value
+  });
+  DB.set('pelanggan', list);
+  e.target.reset();
+  renderPelanggan();
+});
+
+function renderPelanggan() {
+  const list = DB.get('pelanggan');
+  tblPelanggan.innerHTML = list.map(p => `
+    <tr class="border-t">
+      <td class="p-3">${p.nama}</td>
+      <td class="p-3">${p.alamat}</td>
+      <td class="p-3">${p.hp}</td>
+      <td class="p-3">${p.paket}</td>
+      <td class="p-3">Rp ${p.biaya.toLocaleString()}</td>
+      <td class="p-3"><button onclick="hapusPelanggan(${p.id})" class="text-red-600 text-xs font-semibold">Hapus</button></td>
+    </tr>`).join('') || '<tr><td colspan="6" class="p-3 text-center text-slate-400">Belum ada pelanggan</td></tr>';
+
+  // update dropdowns
+  const opts = list.map(p => `<option value="${p.id}">${p.nama}</option>`).join('');
+  tPelanggan.innerHTML = opts;
+  tkPelanggan.innerHTML = opts;
+}
+
+function hapusPelanggan(id) {
+  if (!confirm('Hapus pelanggan ini?')) return;
+  DB.set('pelanggan', DB.get('pelanggan').filter(p => p.id !== id));
+  renderPelanggan();
+}
+
+// ================== TAGIHAN ==================
+document.getElementById('formTagihan').addEventListener('submit', e => {
+  e.preventDefault();
+  const list = DB.get('tagihan');
+  const pel = DB.get('pelanggan').find(p => p.id === +tPelanggan.value);
+  list.push({
+    id: Date.now(),
+    pelangganId: +tPelanggan.value,
+    nama: pel.nama,
+    periode: tBulan.value,
+    jumlah: +tJumlah.value,
+    status: 'Belum Lunas'
+  });
+  DB.set('tagihan', list);
+  e.target.reset();
+  renderTagihan();
+});
+
+function renderTagihan() {
+  const list = DB.get('tagihan');
+  tblTagihan.innerHTML = list.map(t => `
+    <tr class="border-t">
+      <td class="p-3">${t.nama}</td>
+      <td class="p-3">${t.periode}</td>
+      <td class="p-3">Rp ${t.jumlah.toLocaleString()}</td>
+      <td class="p-3">
+        <span class="px-2 py-1 rounded-full text-xs font-semibold ${t.status === 'Lunas' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">${t.status}</span>
+      </td>
+      <td class="p-3">
+        ${t.status === 'Belum Lunas' ? `<button onclick="lunaskan(${t.id})" class="text-green-600 text-xs font-semibold">Tandai Lunas</button>` : `<button onclick="hapusTagihan(${t.id})" class="text-red-600 text-xs font-semibold">Hapus</button>`}
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5" class="p-3 text-center text-slate-400">Belum ada tagihan</td></tr>';
+}
+
+function lunaskan(id) {
+  const list = DB.get('tagihan');
+  const t = list.find(x => x.id === id);
+  t.status = 'Lunas';
+  DB.set('tagihan', list);
+  // auto catat ke kas
+  const kas = DB.get('kas');
+  kas.push({
+    id: Date.now(),
+    tanggal: new Date().toISOString().split('T')[0],
+    ket: `Pembayaran tagihan ${t.nama} - ${t.periode}`,
+    tipe: 'masuk',
+    jumlah: t.jumlah
+  });
+  DB.set('kas', kas);
+  renderTagihan(); renderKas(); renderDashboard();
+}
+
+function hapusTagihan(id) {
+  DB.set('tagihan', DB.get('tagihan').filter(x => x.id !== id));
+  renderTagihan();
+}
+
+// ================== TIKET ==================
+document.getElementById('formTiket').addEventListener('submit', e => {
+  e.preventDefault();
+  const list = DB.get('tiket');
+  const pel = DB.get('pelanggan').find(p => p.id === +tkPelanggan.value);
+  list.push({
+    id: Date.now(),
+    tanggal: new Date().toISOString().split('T')[0],
+    pelangganId: +tkPelanggan.value,
+    nama: pel.nama,
+    deskripsi: tkDeskripsi.value,
+    teknisi: tkTeknisi.value || '-',
+    status: 'Open'
+  });
+  DB.set('tiket', list);
+  e.target.reset();
+  renderTiket();
+});
+
+function renderTiket() {
+  const list = DB.get('tiket');
+  const warna = { Open: 'bg-red-100 text-red-700', Proses: 'bg-yellow-100 text-yellow-700', Selesai: 'bg-green-100 text-green-700' };
+  tblTiket.innerHTML = list.map(t => `
+    <tr class="border-t">
+      <td class="p-3">${t.tanggal}</td>
+      <td class="p-3">${t.nama}</td>
+      <td class="p-3">${t.deskripsi}</td>
+      <td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-semibold ${warna[t.status]}">${t.status}</span></td>
+      <td class="p-3 space-x-2">
+        ${t.status === 'Open' ? `<button onclick="ubahTiket(${t.id},'Proses')" class="text-yellow-600 text-xs font-semibold">Proses</button>` : ''}
+        ${t.status === 'Proses' ? `<button onclick="ubahTiket(${t.id},'Selesai')" class="text-green-600 text-xs font-semibold">Selesai</button>` : ''}
+        ${t.status === 'Selesai' ? `<button onclick="hapusTiket(${t.id})" class="text-red-600 text-xs font-semibold">Hapus</button>` : ''}
+      </td>
+    </tr>`).join('') || '<tr><td colspan="5" class="p-3 text-center text-slate-400">Belum ada tiket</td></tr>';
+}
+
+function ubahTiket(id, status) {
+  const list = DB.get('tiket');
+  list.find(x => x.id === id).status = status;
+  DB.set('tiket', list);
+  renderTiket(); renderDashboard();
+}
+
+function hapusTiket(id) {
+  DB.set('tiket', DB.get('tiket').filter(x => x.id !== id));
+  renderTiket();
+}
+
+// ================== KAS ==================
+document.getElementById('formKas').addEventListener('submit', e => {
+  e.preventDefault();
+  const list = DB.get('kas');
+  list.push({
+    id: Date.now(),
+    tanggal: kTanggal.value,
+    ket: kKet.value,
+    tipe: kTipe.value,
+    jumlah: +kJumlah.value
+  });
+  DB.set('kas', list);
+  e.target.reset();
+  renderKas();
+});
+
+function renderKas() {
+  const list = DB.get('kas').sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+  tblKas.innerHTML = list.map(k => `
+    <tr class="border-t">
+      <td class="p-3">${k.tanggal}</td>
+      <td class="p-3">${k.ket}</td>
+      <td class="p-3"><span class="px-2 py-1 rounded-full text-xs font-semibold ${k.tipe === 'masuk' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${k.tipe.toUpperCase()}</span></td>
+      <td class="p-3">Rp ${k.jumlah.toLocaleString()}</td>
+    </tr>`).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Belum ada transaksi</td></tr>';
+}
+
+// ================== BAGI HASIL ==================
+document.getElementById('formBagi').addEventListener('submit', e => {
+  e.preventDefault();
+  const bulan = bBulan.value;
+  const kas = DB.get('kas').filter(k => k.tanggal.startsWith(bulan));
+  const masuk = kas.filter(k => k.tipe === 'masuk').reduce((s, k) => s + k.jumlah, 0);
+  const keluar = kas.filter(k => k.tipe === 'keluar').reduce((s, k) => s + k.jumlah, 0);
+  const laba = masuk - keluar;
+  const persen = +bPersen.value;
+  const jumlah = Math.round(laba * persen / 100);
+
+  hasilBagi.innerHTML = `
+    <div class="p-4 bg-blue-50 rounded-xl space-y-1 text-sm">
+      <p>Pendapatan bulan ${bulan}: <b>Rp ${masuk.toLocaleString()}</b></p>
+      <p>Pengeluaran: <b>Rp ${keluar.toLocaleString()}</b></p>
+      <p>Laba Bersih: <b>Rp ${laba.toLocaleString()}</b></p>
+      <p class="text-lg">Bagi Hasil (${persen}%): <b class="text-blue-700">Rp ${jumlah.toLocaleString()}</b></p>
+    </div>`;
+
+  if (laba <= 0) { alert('Laba bersih 0 atau minus, bagi hasil tidak disimpan.'); return; }
+
+  const list = DB.get('bagi');
+  list.push({ id: Date.now(), bulan, penerima: bPenerima.value, persen, jumlah, laba });
+  DB.set('bagi', list);
+  renderBagi();
+});
+
+function renderBagi() {
+  const list = DB.get('bagi');
+  tblBagi.innerHTML = list.map(b => `
+    <tr class="border-t">
+      <td class="p-3">${b.bulan}</td>
+      <td class="p-3">${b.penerima}</td>
+      <td class="p-3">${b.persen}%</td>
+      <td class="p-3">Rp ${b.jumlah.toLocaleString()}</td>
+    </tr>`).join('') || '<tr><td colspan="4" class="p-3 text-center text-slate-400">Belum ada data</td></tr>';
+}
+
+// ================== DASHBOARD ==================
+let chartInst = null;
+function renderDashboard() {
+  const pel = DB.get('pelanggan');
+  const tag = DB.get('tagihan');
+  const kas = DB.get('kas');
+  const tiket = DB.get('tiket');
+
+  statPelanggan.textContent = pel.length;
+  statLunas.textContent = tag.filter(t => t.status === 'Lunas').length;
+  statBelum.textContent = tag.filter(t => t.status !== 'Lunas').length;
+  const saldo = kas.reduce((s, k) => s + (k.tipe === 'masuk' ? k.jumlah : -k.jumlah), 0);
+  statSaldo.textContent = 'Rp ' + saldo.toLocaleString();
+
+  // tiket preview
+  const open = tiket.filter(t => t.status !== 'Selesai');
+  tiketPreview.innerHTML = open.length ? open.slice(0, 5).map(t => `
+    <div class="flex justify-between p-2 border-b last:border-0">
+      <span>${t.nama} - ${t.deskripsi}</span>
+      <span class="text-xs px-2 py-1 rounded-full bg-yellow-100 text-yellow-700">${t.status}</span>
+    </div>`).join('') : 'Tidak ada tiket terbuka';
+
+  // chart
+  const last6 = [...Array(6)].map((_, i) => {
+    const d = new Date(); d.setMonth(d.getMonth() - (5 - i));
+    return d.toISOString().slice(0, 7);
+  });
+  const masukData = last6.map(m => kas.filter(k => k.tanggal.startsWith(m) && k.tipe === 'masuk').reduce((s, k) => s + k.jumlah, 0));
+  const keluarData = last6.map(m => kas.filter(k => k.tanggal.startsWith(m) && k.tipe === 'keluar').reduce((s, k) => s + k.jumlah, 0));
+
+  if (chartInst) chartInst.destroy();
+  chartInst = new Chart(document.getElementById('kasChart'), {
+    type: 'bar',
+    data: {
+      labels: last6,
+      datasets: [
+        { label: 'Masuk', data: masukData, backgroundColor: '#3b82f6' },
+        { label: 'Keluar', data: keluarData, backgroundColor: '#ef4444' }
+      ]
+    },
+    options: { responsive: true, plugins: { legend: { position: 'top' } } }
+  });
+}
+
+// ================== INIT ==================
+function renderAll() {
+  renderPelanggan(); renderTagihan(); renderTiket(); renderKas(); renderBagi(); renderDashboard();
+}
+</script>
+</body>
+</html>
