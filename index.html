@@ -119,7 +119,7 @@
       </div>
 
       <div class="bg-white p-6 rounded-2xl shadow-sm mb-6">
-        <h3 class="font-bold text-slate-800 mb-4">Grafik Kas (Masuk vs Keluar)</h3>
+        <h3 class="font-bold text-slate-800 mb-4">Grafik Kas (Debit & Kredit)</h3>
         <canvas id="kasChart" height="90"></canvas>
       </div>
 
@@ -598,19 +598,17 @@ function renderDashboard() {
   const masukData = last6.map(m => kas.filter(k => k.tanggal.startsWith(m) && k.tipe === 'masuk').reduce((s, k) => s + k.jumlah, 0));
   const keluarData = last6.map(m => kas.filter(k => k.tanggal.startsWith(m) && k.tipe === 'keluar').reduce((s, k) => s + k.jumlah, 0));
 
-  if (chartInst) chartInst.destroy();
-  chartInst = new Chart(document.getElementById('kasChart'), {
+  if chartInst = new Chart(document.getElementById('kasChart'), {
     type: 'bar',
     data: {
       labels: last6,
       datasets: [
-        { label: 'Masuk', data: masukData, backgroundColor: '#3b82f6' },
-        { label: 'Keluar', data: keluarData, backgroundColor: '#ef4444' }
+        { label: 'Debit', data: masukData, backgroundColor: '#3b82f6' },
+        { label: 'Kredit', data: keluarData, backgroundColor: '#ef4444' }
       ]
     },
     options: { responsive: true, plugins: { legend: { position: 'top' } } }
   });
-}
 
 // ================== INIT ==================
 function renderAll() {
